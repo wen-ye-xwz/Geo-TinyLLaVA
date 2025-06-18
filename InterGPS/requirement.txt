@@ -8,8 +8,9 @@ scikit-learn
 antlr4-python3-runtime
 
 # the symbolic solver
-kanren
+minikanren
 sympy
+pyparsing
 func_timeout
 multiprocess
 
