@@ -29,7 +29,8 @@ pip install --upgrade pip
 
 # prerequisites of the training and inference of Geo-TinyLLaVA
 cd TinyLLaVA_Factory 
-pip install -e .         
+pip install -e .
+pip install deepspeed tokenizers transformers peft          
 
 # prerequisites of the evaluation of geometry diagram formalization performance and geometry problem solving performance of Inter-GPS
 cd ..
