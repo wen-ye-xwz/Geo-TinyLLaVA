@@ -24,13 +24,9 @@ cd Geo-TinyLLaVA
 3. Install all required python dependencies of TinyLLaVA and Inter-GPS.
 
 ```bash
-# enable PEP 660 support
-pip install --upgrade pip  
-
 # prerequisites of the training and inference of Geo-TinyLLaVA
 cd TinyLLaVA_Factory 
-pip install -e .
-pip install deepspeed tokenizers transformers peft          
+pip install -e .         
 
 # prerequisites of the evaluation of geometry diagram formalization performance and geometry problem solving performance of Inter-GPS
 cd ..
@@ -47,14 +43,39 @@ cd ..
 git clone https://huggingface.co/datasets/1509cxt/GDF86K
 ```
 
-## Geometry Diagram Formalization Performance Evaluation
+## Train Geo-TinyLLaVA from Scrach
 
-## Geometry Problem Solving Performance Evaluation
+```
+cd TinyLLaVA_Factory
+bash ./work/custom_finetune_PCT.sh
+```
 
 ## Run Geo-TinyLLaVA 
 
-## Train Geo-TinyLLaVA from Scrach
+```
+cd TinyLLaVA_Factory
+python ./work/inference_GeoTinyLLaVA.py
 
+# combine the formalization and detection part to form a complete diagram parsing result
+python ./work/combine_formalization_and_detection.py
+```
 
-## Acknowledgement
-The project is built on top of [InterGPS](https://github.com/lupantech/InterGPS) and [TinyLLaVA_Factory](https://github.com/TinyLLaVA/TinyLLaVA_Factory). Thanks for their wonderful works.
+## Geometry Diagram Formalization Performance Evaluation
+
+```
+cd InterGPS/diagram_parser/evaluation
+python calc_diagram_accuracy.py \
+--diagram_test /root/autodl-tmp/Geo-TinyLLaVA/TinyLLaVA_Factory/test_output/geotinyllava_pct/combined_diagram_parsing_result.json \
+--diagram_gt ../../data/geometry3k/logic_forms/diagram_logic_forms_annot_refined.json
+```
+
+## Geometry Problem Solving Performance Evaluation
+
+```
+cd InterGPS/symbolic_solver
+python test.py --label final_new \
+--strategy final \
+--text_logic_form_path ../text_parser/text_logic_forms.json \
+--diagram_logic_form_path /root/autodl-tmp/Geo-TinyLLaVA/TinyLLaVA_Factory/test_output/geotinyllava_pct/combined_diagram_parsing_result.json \
+--predict_path ../theorem_predict/results/test/pred_seqs_test_bart_best.json
+```
