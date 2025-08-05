@@ -2,7 +2,7 @@
 
 Code and data for the paper "Plane Geometry Diagram Formalization via Vision-Language Models".
 
-Dataset [GDF86K](https://huggingface.co/datasets/1509cxt/GDF86K), Model Checkpoints [Geo-TinyLLaVA](https://huggingface.co/1509cxt/Geo-TinyLLaVA).
+[Paper](https://openreview.net/forum?id=RvUtaFyQZD), Dataset [GDF86K](https://huggingface.co/datasets/1509cxt/GDF86K), Model Checkpoints [Geo-TinyLLaVA](https://huggingface.co/1509cxt/Geo-TinyLLaVA).
 
 Notice: Here we publish the model checkpoints of GeoTinyLLaVA trained with the Predicate Commutativity 
 Transformation (PCT) augmented instruction-tuning dataset ([PCT.json](https://huggingface.co/datasets/1509cxt/GDF86K/blob/main/PCT.json)), which gives the best performance on Inter-GPS geometry problem solving among the 4 model checkpoints.
@@ -78,4 +78,18 @@ python test.py --label final_new \
 --text_logic_form_path ../text_parser/text_logic_forms.json \
 --diagram_logic_form_path /root/autodl-tmp/Geo-TinyLLaVA/TinyLLaVA_Factory/test_output/geotinyllava_pct/combined_diagram_parsing_result.json \
 --predict_path ../theorem_predict/results/test/pred_seqs_test_bart_best.json
+```
+
+## Citation
+If you find our work useful, please cite:
+```
+@misc{cui2025plane,
+  title        = {Plane Geometry Diagram Formalization via {Vision-Language Models}},
+  author       = {Cui, Xiaoteng and Liu, Yi},
+  year         = {2025},
+  month        = jul,
+  howpublished = {the 2nd AI for {MATH} Workshop at the 42nd International Conference on Machine Learning ({ICML} 2025), Vancouver, Canada},
+  note         = {Non-archival poster},
+  url          = {https://openreview.net/forum?id=RvUtaFyQZD}
+}
 ```
