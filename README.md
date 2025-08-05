@@ -80,8 +80,10 @@ python test.py --label final_new \
 --predict_path ../theorem_predict/results/test/pred_seqs_test_bart_best.json
 ```
 
-## Citation
-If you find our work useful, please cite:
+## Acknowledgement and Citation
+The project is built on top of the amazing [InterGPS](https://github.com/lupantech/InterGPS) and [TinyLLaVA_Factory](https://github.com/TinyLLaVA/TinyLLaVA_Factory) repository. Thanks for their great work!
+
+If you find our work helpful, please cite:
 ```
 @misc{cui2025plane,
   title        = {Plane Geometry Diagram Formalization via {Vision-Language Models}},
