@@ -4,6 +4,7 @@ import argparse
 import numpy as np
 from itertools import product, permutations, combinations
 import sys
+from math import comb
 sys.path.append("../../symbolic_solver")
 
 from basic_definition import BasicDefinition
@@ -126,24 +127,18 @@ def diagram_evaluaion(graph_gt, graph_test):
     
     return Accuracy, Recall, IoU
 
-if __name__ == '__main__':
 
-    parser = argparse.ArgumentParser(description='evaluate')
-
-    parser.add_argument('--diagram_gt', default='../../data/geometry3k/logic_forms/diagram_logic_forms_annot.json')
-    parser.add_argument('--diagram_test', default='../diagram_logic_forms.json')
-    
-    parser = parser.parse_args()
-
-    with open(parser.diagram_gt, "r") as f1:
-        gt = json.load(f1)
-    with open(parser.diagram_test, "r") as f2:
-        test = json.load(f2)
-    
+def summary(test, gt):
     AccuracyList = []
     RecallList = []
     IoUList = []
     for idx in range(2401, 3002):
+        #copy over every entry from gt to test except diagram_logic_forms for debugging
+        for key in gt.get(str(idx), {}):
+            if key=="diagram_logic_forms":
+                continue
+            else:
+                test[str(idx)][key]=gt[str(idx)][key]
         Accuracy, Recall, IoU = diagram_evaluaion(gt.get(str(idx), None), test.get(str(idx), None))
         AccuracyList.append(Accuracy)
         RecallList.append(Recall)
@@ -166,3 +161,50 @@ if __name__ == '__main__':
     number = sum([calc_f1(x['logic_forms'], y['logic_forms']) >= 0.5 for x, y in zip(AccuracyList, RecallList)])
     print ("Likely Same (F1 Score >= 50%%): %.2f%%" % (number / len(AccuracyList) * 100))
 
+    return AccuracyList
+
+def pass_at_k(n, c, k):
+    """Probability at least one of k samples is correct."""
+    assert k<=n, "k should be less than or equal to n"
+    if c == 0:
+        return 0.0
+    if n <= 0:
+        return 0.0
+    if n-c < k:
+        return 1.0
+    return 1.0 - (comb(n - c, k) / comb(n, k))
+
+if __name__ == '__main__':
+
+    parser = argparse.ArgumentParser(description='evaluate')
+
+    parser.add_argument('--diagram_gt', default='/mnt/weka/home/xuezhe.ma/projects/yewendy/Geo-TinyLLaVA/InterGPS/data/logic_forms/diagram_logic_forms_annot.json')
+    parser.add_argument('--diagram_test_prefix', default='/mnt/weka/home/xuezhe.ma/projects/yewendy/LLaMA-Factory/logic_form_jsonl_output/qwen3vl-2b_full_sft_checkpoint-500_logic_form_outputs')
+    parser.add_argument("--image_type", type=str, default="diagram", choices=["wo_points", "with_points"])
+    parser = parser.parse_args()
+
+    with open(parser.diagram_gt, "r") as f1:
+        gt = json.load(f1)
+    # with open(parser.diagram_test_prefix, "r") as f2:
+    #     test = json.load(f2)
+    all_accuracy = []
+    for rollout in range(3):
+        actual_path = f"{parser.diagram_test_prefix}_{rollout}_prediction"
+        if parser.image_type == "with_points":
+            actual_path += "_with_points"
+        actual_path += ".json"
+        with open(actual_path, "r") as f2:
+            test_part = json.load(f2)
+        results = summary(test_part, gt)
+        logic_form_accuracies = [res['logic_forms'] for res in results]
+        all_accuracy.append(logic_form_accuracies)
+
+    all_accuracy = np.array(all_accuracy)  # (num_rollouts, num_samples)
+    per_example_rollout_scores = all_accuracy.transpose(1, 0)  # (num_samples, num_rollouts)
+    print(per_example_rollout_scores.shape)
+    num_examples = len(per_example_rollout_scores)
+    #take the max among all rollouts
+    per_example_best_scores = np.max(per_example_rollout_scores, axis=1)
+
+    mean_accuracy = np.mean(per_example_best_scores)
+    print(f"Mean accuracy over {num_examples} examples after taking the max of 3 rollouts: {mean_accuracy*100:.2f}%")
